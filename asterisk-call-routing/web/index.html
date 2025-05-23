@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Call Routing System Dashboard</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+       
+       body {
+           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           background-color: #f5f5f5;
+           color: #333;
+       }
+       
+       .header {
+           background-color: #2c3e50;
+           color: white;
+           padding: 1rem 2rem;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+       }
+       
+       .container {
+           max-width: 1400px;
+           margin: 0 auto;
+           padding: 2rem;
+       }
+       
+       .stats-grid {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+           gap: 1.5rem;
+           margin-bottom: 2rem;
+       }
+       
+       .stat-card {
+           background: white;
+           border-radius: 8px;
+           padding: 1.5rem;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+           transition: transform 0.2s;
+       }
+       
+       .stat-card:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+       }
+       
+       .stat-title {
+           font-size: 0.875rem;
+           color: #666;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+           margin-bottom: 0.5rem;
+       }
+       
+       .stat-value {
+           font-size: 2rem;
+           font-weight: 600;
+           color: #2c3e50;
+           margin-bottom: 0.5rem;
+       }
+       
+       .stat-detail {
+           font-size: 0.875rem;
+           color: #666;
+       }
+       
+       .progress-bar {
+           width: 100%;
+           height: 8px;
+           background-color: #e0e0e0;
+           border-radius: 4px;
+           overflow: hidden;
+           margin-top: 0.5rem;
+       }
+       
+       .progress-fill {
+           height: 100%;
+           background-color: #3498db;
+           transition: width 0.3s ease;
+       }
+       
+       .calls-table {
+           background: white;
+           border-radius: 8px;
+           padding: 1.5rem;
+           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+           overflow-x: auto;
+       }
+       
+       table {
+           width: 100%;
+           border-collapse: collapse;
+       }
+       
+       th, td {
+           text-align: left;
+           padding: 0.75rem;
+           border-bottom: 1px solid #e0e0e0;
+       }
+       
+       th {
+           font-weight: 600;
+           color: #666;
+           font-size: 0.875rem;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+       }
+       
+       .status {
+           display: inline-block;
+           padding: 0.25rem 0.75rem;
+           border-radius: 4px;
+           font-size: 0.75rem;
+           font-weight: 500;
+       }
+       
+       .status-completed {
+           background-color: #d4edda;
+           color: #155724;
+       }
+       
+       .status-active {
+           background-color: #cce5ff;
+           color: #004085;
+       }
+       
+       .status-failed {
+           background-color: #f8d7da;
+           color: #721c24;
+       }
+       
+       .refresh-btn {
+           background-color: #3498db;
+           color: white;
+           border: none;
+           padding: 0.5rem 1rem;
+           border-radius: 4px;
+           cursor: pointer;
+           font-size: 0.875rem;
+           transition: background-color 0.2s;
+       }
+       
+       .refresh-btn:hover {
+           background-color: #2980b9;
+       }
+       
+       .section-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 1rem;
+       }
+       
+       @keyframes pulse {
+           0% { opacity: 1; }
+           50% { opacity: 0.5; }
+           100% { opacity: 1; }
+       }
+       
+       .loading {
+           animation: pulse 1.5s infinite;
+       }
+   </style>
+</head>
+<body>
+   <div class="header">
+       <h1>Call Routing System Dashboard</h1>
+   </div>
+   
+   <div class="container">
+       <div class="section-header">
+           <h2>System Statistics</h2>
+           <button class="refresh-btn" onclick="refreshData()">Refresh</button>
+       </div>
+       
+       <div class="stats-grid" id="statsGrid">
+           <div class="stat-card loading">
+               <div class="stat-title">Active Calls</div>
+               <div class="stat-value" id="activeCalls">-</div>
+               <div class="stat-detail">Currently in progress</div>
+           </div>
+           
+           <div class="stat-card loading">
+               <div class="stat-title">Total Calls</div>
+               <div class="stat-value" id="totalCalls">-</div>
+               <div class="stat-detail">
+                   Success Rate: <span id="successRate">-</span>
+               </div>
+           </div>
+           
+           <div class="stat-card loading">
+               <div class="stat-title">DID Usage</div>
+               <div class="stat-value" id="didUsage">-</div>
+               <div class="stat-detail">
+                   <span id="didsInUse">-</span> of <span id="totalDids">-</span> in use
+               </div>
+               <div class="progress-bar">
+                   <div class="progress-fill" id="didProgress" style="width: 0%"></div>
+               </div>
+           </div>
+           
+           <div class="stat-card loading">
+               <div class="stat-title">Average Duration</div>
+               <div class="stat-value" id="avgDuration">-</div>
+               <div class="stat-detail">Per completed call</div>
+           </div>
+           
+           <div class="stat-card loading">
+               <div class="stat-title">System Uptime</div>
+               <div class="stat-value" id="uptime">-</div>
+               <div class="stat-detail">Since last restart</div>
+           </div>
+           
+           <div class="stat-card loading">
+               <div class="stat-title">Failed Calls</div>
+               <div class="stat-value" id="failedCalls">-</div>
+               <div class="stat-detail">Last 24 hours</div>
+           </div>
+       </div>
+       
+       <div class="section-header">
+           <h2>Recent Calls</h2>
+       </div>
+       
+       <div class="calls-table">
+           <table>
+               <thead>
+                   <tr>
+                       <th>Call ID</th>
+                       <th>ANI</th>
+                       <th>DNIS</th>
+                       <th>DID Used</th>
+                       <th>Status</th>
+                       <th>Duration</th>
+                       <th>Start Time</th>
+                   </tr>
+               </thead>
+               <tbody id="callsTableBody">
+                   <tr>
+                       <td colspan="7" style="text-align: center; padding: 2rem;">
+                           Loading call data...
+                       </td>
+                   </tr>
+               </tbody>
+           </table>
+       </div>
+   </div>
+   
+   <script>
+       let refreshInterval;
+       
+       async function fetchStats() {
+           try {
+               const response = await fetch('/api/stats');
+               const data = await response.json();
+               
+               // Update statistics
+               document.getElementById('activeCalls').textContent = data.calls.active || 0;
+               document.getElementById('totalCalls').textContent = data.calls.total || 0;
+               document.getElementById('successRate').textContent = data.calls.success_rate || '0%';
+               document.getElementById('failedCalls').textContent = data.calls.failed || 0;
+               document.getElementById('avgDuration').textContent = data.calls.avg_duration || '0s';
+               
+               // Update DID stats
+               const didUsagePercent = data.dids.usage_percent || '0%';
+               document.getElementById('didUsage').textContent = didUsagePercent;
+               document.getElementById('didsInUse').textContent = data.dids.in_use || 0;
+               document.getElementById('totalDids').textContent = data.dids.total || 0;
+               document.getElementById('didProgress').style.width = didUsagePercent;
+               
+               // Update system stats
+               document.getElementById('uptime').textContent = formatUptime(data.system.uptime || '0s');
+               
+               // Remove loading animation
+               document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+               
+           } catch (error) {
+               console.error('Error fetching stats:', error);
+           }
+       }
+       
+       async function fetchCalls() {
+           try {
+               const response = await fetch('/api/calls');
+               const calls = await response.json();
+               
+               const tbody = document.getElementById('callsTableBody');
+               
+               if (calls.length === 0) {
+                   tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No calls found</td></tr>';
+                   return;
+               }
+               
+               tbody.innerHTML = calls.slice(0, 20).map(call => `
+                   <tr>
+                       <td>${call.call_id.substring(0, 20)}...</td>
+                       <td>${call.ani_original}</td>
+                       <td>${call.dnis_original}</td>
+                       <td>${call.did_used || '-'}</td>
+                       <td><span class="status status-${call.status}">${call.status}</span></td>
+                       <td>${call.duration ? call.duration + 's' : '-'}</td>
+                       <td>${new Date(call.start_time).toLocaleString()}</td>
+                   </tr>
+               `).join('');
+               
+           } catch (error) {
+               console.error('Error fetching calls:', error);
+           }
+       }
+       
+       function formatUptime(uptime) {
+           // Parse Go duration string
+           const match = uptime.match(/(\d+h)?(\d+m)?(\d+(\.\d+)?s)?/);
+           if (!match) return uptime;
+           
+           const hours = parseInt(match[1]) || 0;
+           const minutes = parseInt(match[2]) || 0;
+           const seconds = parseFloat(match[3]) || 0;
+           
+           if (hours > 24) {
+               const days = Math.floor(hours / 24);
+               return `${days}d ${hours % 24}h`;
+           } else if (hours > 0) {
+               return `${hours}h ${minutes}m`;
+           } else if (minutes > 0) {
+               return `${minutes}m ${Math.floor(seconds)}s`;
+           } else {
+               return `${Math.floor(seconds)}s`;
+           }
+       }
+       
+       function refreshData() {
+           fetchStats();
+           fetchCalls();
+       }
+       
+       // Initial load
+       refreshData();
+       
+       // Auto-refresh every 5 seconds
+       refreshInterval = setInterval(refreshData, 5000);
+       
+       // Cleanup on page unload
+       window.addEventListener('beforeunload', () => {
+           clearInterval(refreshInterval);
+       });
+   </script>
+</body>
+</html>

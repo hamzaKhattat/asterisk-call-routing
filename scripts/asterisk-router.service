@@ -1,0 +1,15 @@
+[Unit]
+Description=Asterisk Call Routing System
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=asterisk
+Group=asterisk
+WorkingDirectory=/opt/asterisk-call-routing
+ExecStart=/opt/asterisk-call-routing/bin/router -config /opt/asterisk-call-routing/configs/config.json
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

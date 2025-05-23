@@ -1,0 +1,33 @@
+{
+   "database": {
+       "host": "localhost",
+       "port": 3306,
+       "username": "root",
+       "password": "temppass",
+       "name": "call_routing"
+   },
+   "asterisk": {
+       "ami": {
+           "host": "localhost",
+           "port": 5038,
+           "username": "admin",
+           "password": "admin"
+       },
+       "ari": {
+           "url": "http://localhost:8088",
+           "username": "asterisk",
+           "password": "asterisk"
+       }
+   },
+   "router": {
+       "did_selection_mode": "random",
+       "max_retries": 3,
+       "retry_delay": 5,
+       "call_timeout": 300
+   },
+   "trunks": {
+       "to_s1": "TRUNK_1",
+       "to_s3": "TRUNK_3",
+       "to_s4": "TRUNK_4"
+   }
+}
